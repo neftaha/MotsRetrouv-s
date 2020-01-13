@@ -1,0 +1,75 @@
+package fr.univparis8.app.motsretrouves.features.gamehistory;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import fr.univparis8.app.motsretrouves.R;
+import fr.univparis8.app.motsretrouves.commons.DurationFormatter;
+import fr.univparis8.app.motsretrouves.model.GameDataInfo;
+import fr.univparis8.app.motsretrouves.easyadapter.AdapterDelegate;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class GameDataAdapterDelegate extends AdapterDelegate<GameDataInfo, GameDataAdapterDelegate.ViewHolder> {
+
+    private OnClickListener mListener;
+
+    public GameDataAdapterDelegate() {
+        super(GameDataInfo.class);
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_game_data_history, parent, false);
+        return new ViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(GameDataInfo model, ViewHolder holder) {
+        holder.textName.setText(model.getName());
+        holder.textDuration.setText(DurationFormatter.fromInteger(model.getDuration()));
+        String desc = holder.itemView.getContext().getString(R.string.game_data_desc);
+        desc = desc.replaceAll(":gridSize", model.getGridRowCount() + "x" + model.getGridColCount());
+        desc = desc.replaceAll(":wordCount", String.valueOf(model.getUsedWordsCount()));
+        holder.textOtherDesc.setText(desc);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (mListener != null) {
+                mListener.onClick(model);
+            }
+        });
+        holder.viewDeleteItem.setOnClickListener(v -> {
+            if (mListener != null) {
+                mListener.onDeleteClick(model);
+            }
+        });
+    }
+
+    public void setOnClickListener(OnClickListener listener) {
+        mListener = listener;
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.text_name)
+        TextView textName;
+        @BindView(R.id.text_duration) TextView textDuration;
+        @BindView(R.id.text_desc) TextView textOtherDesc;
+        @BindView(R.id.delete_list_item)
+        View viewDeleteItem;
+        ViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public interface OnClickListener {
+        void onClick(GameDataInfo gameDataInfo);
+        void onDeleteClick(GameDataInfo gameDataInfo);
+    }
+}
